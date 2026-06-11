@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS patients(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     full_name TEXT,
     dob TEXT,
-    email TEXT,
+    email TEXT UNIQUE,
     glucose REAL,
     haemoglobin REAL,
     cholesterol REAL,

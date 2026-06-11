@@ -1,11 +1,15 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import sqlite3
+import re
 from ai_prediction import predict_health
 
 app = Flask(__name__)
 
 CORS(app, origins='*')
+def is_valid_email(email):
+    pattern = r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'
+    return re.match(pattern, email)
 
 @app.route("/patients", methods=["GET", "POST", "OPTIONS"])
 def handle_patients():
@@ -23,8 +27,10 @@ def handle_patients():
     
     elif request.method == "POST":
         data = request.json
-        
        
+        if not is_valid_email(data["email"]):
+            return jsonify({"error": "Invalid email format"}), 400
+
         try:
             remarks = predict_health(
                 data["glucose"],
@@ -86,6 +92,10 @@ def handle_patient(id):
     
     elif request.method == "PUT":
         data = request.json
+        if not is_valid_email(data["email"]):
+            return jsonify({
+                "error": "Invalid email format"
+                }), 400
         
         
         try:

@@ -16,34 +16,23 @@ function CreatePatient() {
   });
 
   const handleSubmit = async (e) => {
-    const today = new Date().toISOString().split("T")[0];
-
-if (form.dob > today) {
-  alert("Future DOB is not allowed");
-  return;
-}
   e.preventDefault();
 
-  if (
-    !form.full_name ||
-    !form.dob ||
-    !form.email ||
-    !form.glucose ||
-    !form.haemoglobin ||
-    !form.cholesterol
-  ) {
-    alert("Please fill all fields");
-    return;
+  try {
+    await axios.post(
+      "http://localhost:5000/patients",
+      form
+    );
+
+    navigate("/");
   }
-
-  await axios.post(
-    "http://localhost:5000/patients",
-    form
-  );
-
-  navigate("/");
+  catch(error) {
+    alert(
+      error.response?.data?.error ||
+      "Something went wrong"
+    );
+  }
 };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-100 flex justify-center items-center px-4 py-8">
 
