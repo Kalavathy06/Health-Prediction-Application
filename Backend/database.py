@@ -1,24 +1,15 @@
 import sqlite3
 
 conn = sqlite3.connect("patients.db")
-
 cursor = conn.cursor()
 
 cursor.execute("""
-CREATE TABLE IF NOT EXISTS patients(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    full_name TEXT,
-    dob TEXT,
-    email TEXT UNIQUE,
-    glucose REAL,
-    haemoglobin REAL,
-    cholesterol REAL,
-    remarks TEXT
-)
+SELECT sql
+FROM sqlite_master
+WHERE type='table'
+AND name='patients'
 """)
 
-conn.commit()
-
-print("Database created successfully")
+print(cursor.fetchone())
 
 conn.close()

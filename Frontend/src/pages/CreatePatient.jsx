@@ -17,20 +17,27 @@ function CreatePatient() {
 
   const handleSubmit = async (e) => {
   e.preventDefault();
-
+  
   try {
-    await axios.post(
-      "http://localhost:5000/patients",
-      form
+    // First check if patient exists
+    const response = await axios.get("http://localhost:5000/patients");
+    const existingPatients = response.data;
+    
+    const duplicate = existingPatients.find(patient => 
+      patient[3] === form.email ||  // email match
+      (patient[1] === form.full_name && patient[2] === form.dob)  // name+DOB match
     );
-
+    
+    if (duplicate) {
+      alert("A patient with this email or same name & DOB already exists!");
+      return;
+    }
+    
+    await axios.post("http://localhost:5000/patients", form);
     navigate("/");
   }
   catch(error) {
-    alert(
-      error.response?.data?.error ||
-      "Something went wrong"
-    );
+    alert(error.response?.data?.error || "Something went wrong");
   }
 };
   return (

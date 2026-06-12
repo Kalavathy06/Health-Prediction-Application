@@ -27,24 +27,25 @@ def handle_patients():
     
     elif request.method == "POST":
         data = request.json
-       
-        if not is_valid_email(data["email"]):
-            return jsonify({"error": "Invalid email format"}), 400
 
-        try:
-            remarks = predict_health(
-                data["glucose"],
-                data["haemoglobin"],
-                data["cholesterol"]
-            )
-        except Exception as e:
-            print(f"AI Prediction failed: {e}")
-            
-            remarks = f"AI prediction temporarily unavailable. Based on blood report: Glucose={data['glucose']}, Haemoglobin={data['haemoglobin']}, Cholesterol={data['cholesterol']}. Please consult a doctor for detailed analysis."
-        
-        conn = sqlite3.connect("patients.db")
-        cursor = conn.cursor()
-        
+    if not is_valid_email(data["email"]):
+        return jsonify({"error": "Invalid email format"}), 400
+
+    try:
+        remarks = predict_health(
+            data["glucose"],
+            data["haemoglobin"],
+            data["cholesterol"]
+        )
+    except Exception as e:
+        print(f"AI Prediction failed: {e}")
+
+        remarks = f"AI prediction temporarily unavailable."
+
+    conn = sqlite3.connect("patients.db")
+    cursor = conn.cursor()
+
+    try:
         cursor.execute("""
         INSERT INTO patients
         (
@@ -67,13 +68,20 @@ def handle_patients():
             data["cholesterol"],
             remarks
         ))
-        
+
         conn.commit()
         conn.close()
-        
+
         return jsonify({
             "message": "Patient Added"
         })
+
+    except sqlite3.IntegrityError:
+        conn.close()
+
+        return jsonify({
+            "error": "Duplicate patient record already exists"
+        }), 400
 
 
 @app.route("/patients/<int:id>", methods=["GET", "PUT", "DELETE", "OPTIONS"])
